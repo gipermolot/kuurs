@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id         Int     @id @default(autoincrement())
+  name       String
+  birth_year Int?
+  bio        String?
+
+  books Book[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  books Book[]
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  title         String
+  published_year Int?
+  description   String?
+
+  author   Author?   @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+}
