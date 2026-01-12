@@ -7,31 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Author {
+model authors {
   id         Int     @id @default(autoincrement())
-  name       String
+  name       String  @db.VarChar(255)
   birth_year Int?
   bio        String?
-
-  books Book[]
+  books      books[]
 }
 
-model Category {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-
-  books Book[]
-}
-
-model Book {
-  id            Int      @id @default(autoincrement())
-  title         String
+model books {
+  id             Int         @id @default(autoincrement())
+  title          String      @db.VarChar(255)
+  author_id      Int?
+  category_id    Int?
   published_year Int?
-  description   String?
+  description    String?
+  authors        authors?    @relation(fields: [author_id], references: [id], onUpdate: NoAction)
+  categories     categories? @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+}
 
-  author   Author?   @relation(fields: [authorId], references: [id])
-  authorId Int?
-
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
+model categories {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar(100)
+  books books[]
 }
