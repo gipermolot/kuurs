@@ -17,14 +17,14 @@ model authors {
 
 
 model books {
-  id             Int         @id @default(autoincrement())
-  title          String      @db.VarChar(255)
-  author_id      Int?
-  category_id    Int?
+  id            Int        @id @default(autoincrement())
+  title         String     @unique
+  description   String?
   published_year Int?
-  description    String?
-  authors        authors?    @relation(fields: [author_id], references: [id], onUpdate: NoAction)
-  categories     categories? @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+  authors       authors    @relation(fields: [author_id], references: [id])
+  author_id     Int
+  categories    categories @relation(fields: [category_id], references: [id])
+  category_id   Int
 }
 
 model categories {
