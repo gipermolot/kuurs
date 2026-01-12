@@ -9,11 +9,12 @@ datasource db {
 
 model authors {
   id         Int     @id @default(autoincrement())
-  name       String  @db.VarChar(255)
+  name       String  @unique
   birth_year Int?
   bio        String?
   books      books[]
 }
+
 
 model books {
   id             Int         @id @default(autoincrement())
