@@ -4,6 +4,55 @@ import pool from './db.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+async function initTables() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS authors (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        birth_year INT,
+        bio TEXT
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS books (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author_id INT REFERENCES authors(id) ON DELETE SET NULL,
+        category_id INT REFERENCES categories(id) ON DELETE SET NULL,
+        published_year INT,
+        description TEXT
+      )
+    `);
+
+    await pool.query(`
+      INSERT INTO authors (name, birth_year, bio)
+      VALUES ('Іван Франко', 1856, 'Український письменник та поет')
+      ON CONFLICT DO NOTHING
+    `);
+
+    await pool.query(`
+      INSERT INTO categories (name)
+      VALUES ('Проза'), ('Поезія')
+      ON CONFLICT DO NOTHING
+    `);
+
+    console.log('✅ Таблиці гарантовано створені');
+  } catch (err) {
+    console.error('❌ Init error:', err);
+  }
+}
+
+initTables();
+
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM authors');

@@ -1,16 +1,14 @@
 {
   "name": "library-server",
   "type": "module",
-	"scripts": {
-	  "start": "node index.js",
-	  "init": "node initDbPostgres.js",
-	  "dev": "nodemon index.js"
-	},
-	"dependencies": {
-	  "cors": "^2.8.5",
-	  "dotenv": "^16.6.1",
-	  "express": "^4.19.2",
-	  "pg": "^8.16.3"
-	}
-
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "pg": "^8.16.3"
+  }
 }

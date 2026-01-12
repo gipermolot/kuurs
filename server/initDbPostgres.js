@@ -1,9 +1,11 @@
-// initDbPostgres.js
+import express from 'express';
 import pool from './db.js';
 
-async function init() {
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+async function initTables() {
   try {
-    // Створюємо таблиці
     await pool.query(`
       CREATE TABLE IF NOT EXISTS authors (
         id SERIAL PRIMARY KEY,
@@ -25,12 +27,7 @@ async function init() {
         published_year INT,
         description TEXT
       );
-    `);
 
-    console.log('✅ Таблиці створено');
-
-    // Додаємо тестові дані
-    await pool.query(`
       INSERT INTO authors (name, birth_year, bio)
       VALUES ('Іван Франко', 1856, 'Український письменник та поет')
       ON CONFLICT DO NOTHING;
@@ -40,13 +37,23 @@ async function init() {
       ON CONFLICT DO NOTHING;
     `);
 
-    console.log('✅ Тестові дані додано');
+    console.log('✅ Таблиці створено і дані додано');
   } catch (err) {
-    console.error('❌ Помилка ініціалізації бази:', err);
-  } finally {
-    await pool.end();
-    console.log('🔌 З\'єднання з PostgreSQL закрито');
+    console.error('❌ Init error:', err);
   }
 }
 
-init();
+initTables();
+
+app.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM authors');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
+});
