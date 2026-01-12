@@ -4,59 +4,42 @@ import pool from './db.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-async function initTables() {
+app.use(express.json());
+
+// === GET всі автори ===
+app.get('/authors', async (req, res) => {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS authors (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        birth_year INT,
-        bio TEXT
-      )
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS categories (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL UNIQUE
-      )
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS books (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        author_id INT REFERENCES authors(id) ON DELETE SET NULL,
-        category_id INT REFERENCES categories(id) ON DELETE SET NULL,
-        published_year INT,
-        description TEXT
-      )
-    `);
-
-    await pool.query(`
-      INSERT INTO authors (name, birth_year, bio)
-      VALUES ('Іван Франко', 1856, 'Український письменник та поет')
-      ON CONFLICT DO NOTHING
-    `);
-
-    await pool.query(`
-      INSERT INTO categories (name)
-      VALUES ('Проза'), ('Поезія')
-      ON CONFLICT DO NOTHING
-    `);
-
-    console.log('✅ Таблиці гарантовано створені');
-  } catch (err) {
-    console.error('❌ Init error:', err);
-  }
-}
-
-initTables();
-
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM authors');
+    const result = await pool.query('SELECT * FROM authors ORDER BY id');
     res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === POST додати автора ===
+app.post('/authors', async (req, res) => {
+  try {
+    const { name, birth_year, bio } = req.body;
+
+    const result = await pool.query(
+      'INSERT INTO authors (name, birth_year, bio) VALUES ($1, $2, $3) RETURNING *',
+      [name, birth_year, bio]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// === DELETE автора ===
+app.delete('/authors/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await pool.query('DELETE FROM authors WHERE id = $1', [id]);
+
+    res.json({ message: 'Автор видалений' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
