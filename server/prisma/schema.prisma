@@ -32,3 +32,10 @@ model categories {
   name  String  @unique @db.VarChar(100)
   books books[]
 }
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}

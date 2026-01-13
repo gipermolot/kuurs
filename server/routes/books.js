@@ -1,49 +1,78 @@
-import express from 'express';
-import prisma from '../db.js';
-import auth from '../middleware/auth.js';
+import express from "express";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 const router = express.Router();
 
-// Get all books
-router.get('/', async (req, res) => {
-  const books = await prisma.books.findMany({
-    include: { authors: true, categories: true }
-  });
-  res.json(books);
+router.get("/", async (req, res) => {
+  try {
+    const { author, category, search, page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
+
+    const where = {
+      AND: [
+        author ? { authors: { name: author } } : {},
+        category ? { categories: { name: category } } : {},
+        search
+          ? {
+              OR: [
+                { title: { contains: search, mode: "insensitive" } },
+                { description: { contains: search, mode: "insensitive" } },
+              ],
+            }
+          : {},
+      ],
+    };
+
+    const books = await prisma.books.findMany({
+      where,
+      skip,
+      take,
+      include: { authors: true, categories: true },
+    });
+
+    const total = await prisma.books.count({ where });
+
+    res.json({ page: parseInt(page), limit: take, total, data: books });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Помилка сервера" });
+  }
 });
 
-// Get book by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
   const book = await prisma.books.findUnique({
-    where: { id: Number(req.params.id) },
-    include: { authors: true, categories: true }
+    where: { id },
+    include: { authors: true, categories: true },
+  });
+  if (!book) return res.status(404).json({ error: "Книга не знайдена" });
+  res.json(book);
+});
+
+router.post("/", async (req, res) => {
+  const { title, authorId, categoryId, published_year, description } = req.body;
+  const book = await prisma.books.create({
+    data: { title, author_id: authorId, category_id: categoryId, published_year, description },
   });
   res.json(book);
 });
 
-// Create book
-router.post('/', auth, async (req, res) => {
-  const { title, author_id, category_id, published_year, description } = req.body;
-  const newBook = await prisma.books.create({
-    data: { title, author_id, category_id, published_year, description }
+router.put("/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, authorId, categoryId, published_year, description } = req.body;
+  const book = await prisma.books.update({
+    where: { id },
+    data: { title, author_id: authorId, category_id: categoryId, published_year, description },
   });
-  res.json(newBook);
+  res.json(book);
 });
 
-// Update book
-router.put('/:id', auth, async (req, res) => {
-  const { title, author_id, category_id, published_year, description } = req.body;
-  const updated = await prisma.books.update({
-    where: { id: Number(req.params.id) },
-    data: { title, author_id, category_id, published_year, description }
-  });
-  res.json(updated);
-});
-
-// Delete book
-router.delete('/:id', auth, async (req, res) => {
-  const deleted = await prisma.books.delete({ where: { id: Number(req.params.id) } });
-  res.json(deleted);
+router.delete("/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  await prisma.books.delete({ where: { id } });
+  res.json({ message: "Книга видалена" });
 });
 
 export default router;
