@@ -16,8 +16,9 @@ router.post("/register", async (req, res) => {
     });
     res.json({ message: "User created", userId: user.id });
   } catch (err) {
-    res.status(400).json({ error: "Email already exists" });
-  }
+  console.error(err); // ← головне
+  res.status(500).json({ error: err.message });
+}
 });
 
 // Логін
