@@ -205,4 +205,9 @@ app.delete("/books/:id", async (req, res) => {
 // ==========================
 // Запуск сервера
 // ==========================
-app.listen(10000, () => console.log("Server started on port 10000"));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+});
+
