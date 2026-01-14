@@ -1,27 +1,29 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchBooks } from "./features/booksSlice";
-import Navbar from "./components/Navbar";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "./components/Header.jsx";
+import Home from "./pages/Home.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Authors from "./pages/Authors.jsx";
+import Books from "./pages/Books.jsx";
+import Categories from "./pages/Categories.jsx";
 
-export default function App() {
-  const dispatch = useDispatch();
-  const books = useSelector(s => s.books.list);
-
-  useEffect(() => {
-    dispatch(fetchBooks());
-  }, [dispatch]);
-
+function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar />
-      <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {books.map(b => (
-          <div key={b.id} className="bg-white p-4 rounded-xl shadow hover:scale-105 transition">
-            <h2 className="font-bold text-lg">{b.title}</h2>
-            <p className="text-gray-600">{b.author}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <BrowserRouter>
+      <Header />
+      <main className="p-6">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/authors" element={<Authors />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/categories" element={<Categories />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 }
+
+export default App;
