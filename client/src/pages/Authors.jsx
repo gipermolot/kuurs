@@ -8,7 +8,7 @@ const Authors = () => {
   useEffect(() => {
     const fetchAuthors = async () => {
       try {
-        const res = await fetch("http://localhost:3000/authors"); // або URL деплою
+        const res = await fetch("https://kuurs.onrender.com/authors"); // або URL деплою
         const data = await res.json();
         setAuthors(data.data || []);
       } catch (err) {

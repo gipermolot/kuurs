@@ -5,7 +5,7 @@ const Books = () => {
 
   useEffect(() => {
     // TODO: підключити реальний бекенд через fetch
-    fetch("http://localhost:3000/books") // або твій Render URL
+    fetch("https://kuurs.onrender.com/books") // або твій Render URL
       .then(res => res.json())
       .then(data => setBooks(data.data || []))
       .catch(err => console.error(err));

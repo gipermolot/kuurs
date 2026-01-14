@@ -5,7 +5,7 @@ const Categories = () => {
 
   useEffect(() => {
     // TODO: підключити реальний бекенд через fetch
-    fetch("http://localhost:3000/categories") // або твій Render URL
+    fetch("https://kuurs.onrender.com/categories") // або твій Render URL
       .then(res => res.json())
       .then(data => setCategories(data.data || []))
       .catch(err => console.error(err));
